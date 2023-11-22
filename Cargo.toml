@@ -22,6 +22,7 @@ members = [
     "native-engine/blaze",
     "native-engine/blaze-jni-bridge",
     "native-engine/blaze-serde",
+    "native-engine/blaze-tests",
 ]
 
 [profile.release]
@@ -37,11 +38,13 @@ opt-level = 1
 lto = false
 codegen-units = 16
 strip = false
+debug = true
 
 [workspace.dependencies]
 blaze = { path = "./native-engine/blaze" }
 blaze-jni-bridge = { path = "./native-engine/blaze-jni-bridge" }
 blaze-serde = { path = "./native-engine/blaze-serde" }
+blaze-tests = { path = "./native-engine/blaze-tests" }
 datafusion-ext-commons = { path = "./native-engine/datafusion-ext-commons" }
 datafusion-ext-exprs = { path = "./native-engine/datafusion-ext-exprs" }
 datafusion-ext-functions = { path = "./native-engine/datafusion-ext-functions" }
