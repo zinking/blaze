@@ -107,6 +107,10 @@ public enum BlazeConf {
     }
 
     private static SparkConf conf() {
-        return SparkEnv$.MODULE$.get().conf();
+        if (SparkEnv$.MODULE$.get() != null) {
+            return SparkEnv$.MODULE$.get().conf();
+        } else {
+            return new SparkConf(false);
+        }
     }
 }

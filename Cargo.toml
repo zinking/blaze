@@ -22,6 +22,7 @@ members = [
     "native-engine/blaze",
     "native-engine/blaze-jni-bridge",
     "native-engine/blaze-serde",
+    "native-engine/blaze-tests",
 ]
 
 [profile.release]

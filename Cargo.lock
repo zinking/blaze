@@ -470,6 +470,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "blaze-tests"
+version = "0.1.0"
+dependencies = [
+ "ahash",
+ "arrow",
+ "async-trait",
+ "base64",
+ "blaze-jni-bridge",
+ "bytes",
+ "bytesize",
+ "datafusion",
+ "datafusion-ext-commons",
+ "datafusion-ext-exprs",
+ "datafusion-ext-plans",
+ "derivative",
+ "futures",
+ "hashbrown",
+ "itertools 0.10.5",
+ "jni",
+ "log",
+ "lz4_flex",
+ "num",
+ "object_store",
+ "once_cell",
+ "panic-message",
+ "parking_lot",
+ "paste",
+ "rand",
+ "tempfile",
+ "tokio",
+ "walkdir",
+ "zstd",
+]
+
+[[package]]
 name = "block-buffer"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
