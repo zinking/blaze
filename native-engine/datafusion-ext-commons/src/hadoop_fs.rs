@@ -16,8 +16,13 @@ use blaze_jni_bridge::{
     jni_call, jni_call_static, jni_new_direct_byte_buffer, jni_new_global_ref, jni_new_object,
     jni_new_string,
 };
+use jni::{
+    sys::{JNI_FALSE},
+};
 use datafusion::{error::Result, physical_plan::metrics::Time};
-use jni::objects::{GlobalRef, JObject};
+use jni::objects::{
+    GlobalRef, JObject
+};
 
 pub struct Fs {
     fs: GlobalRef,
@@ -126,6 +131,14 @@ impl FsProvider {
                 jni_new_string!(path)?.as_obj()
             ) -> JObject
         )?;
+        Ok(Fs::new(jni_new_global_ref!(fs.as_obj())?, &self.io_time))
+    }
+
+    pub fn provide_local(&self, path: &str) -> Result<Fs> {
+        let _timer = self.io_time.timer();
+        let false_local = jni_new_object!(JavaBoolean(JNI_FALSE)).unwrap();
+        let conf = jni_new_object!(HadoopConfiguration(false_local.as_obj()))?;
+        let fs = jni_call_static!(HadoopFileSystem.get(conf.as_obj()) -> JObject)?;
         Ok(Fs::new(jni_new_global_ref!(fs.as_obj())?, &self.io_time))
     }
 }

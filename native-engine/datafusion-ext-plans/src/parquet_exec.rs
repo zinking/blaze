@@ -345,7 +345,7 @@ impl ParquetFileReader {
                             self.meta.location.filename()
                         ))
                     })?;
-                let fs = self.fs_provider.provide(&path)?;
+                let fs = self.fs_provider.provide_local(&path)?;
                 Ok(Arc::new(fs.open(&path)?))
             })
             .map_err(|e| ParquetError::External(e))?;

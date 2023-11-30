@@ -390,6 +390,7 @@ pub struct JavaClasses<'a> {
     pub cScalaFunction1: ScalaFunction1<'a>,
     pub cScalaFunction2: ScalaFunction2<'a>,
 
+    pub cHadoopConfiguration: HadoopConfiguration<'a>,
     pub cHadoopFileSystem: HadoopFileSystem<'a>,
     pub cHadoopPath: HadoopPath<'a>,
     pub cHadoopFSDataInputStream: HadoopFSDataInputStream<'a>,
@@ -453,6 +454,7 @@ impl JavaClasses<'static> {
                 cScalaFunction1: ScalaFunction1::new(env).unwrap(),
                 cScalaFunction2: ScalaFunction2::new(env).unwrap(),
 
+                cHadoopConfiguration: HadoopConfiguration::new(env).unwrap(),
                 cHadoopFileSystem: HadoopFileSystem::new(env).unwrap(),
                 cHadoopPath: HadoopPath::new(env).unwrap(),
                 cHadoopFSDataInputStream: HadoopFSDataInputStream::new(env).unwrap(),
@@ -972,12 +974,32 @@ impl<'a> ScalaFunction2<'a> {
 }
 
 #[allow(non_snake_case)]
+pub struct HadoopConfiguration<'a> {
+    pub class: JClass<'a>,
+    pub ctor: JMethodID,
+}
+
+impl<'a> HadoopConfiguration<'a> {
+    pub const SIG_TYPE: &'static str = "org/apache/hadoop/conf/Configuration";
+
+    pub fn new(env: &JNIEnv<'a>) -> JniResult<HadoopConfiguration<'a>> {
+        let class = get_global_jclass(env, Self::SIG_TYPE)?;
+        Ok(HadoopConfiguration {
+            class,
+            ctor: env.get_method_id(class, "<init>", "(Z)V")?,
+        })
+    }
+}
+
+#[allow(non_snake_case)]
 pub struct HadoopFileSystem<'a> {
     pub class: JClass<'a>,
     pub method_open: JMethodID,
     pub method_open_ret: ReturnType,
     pub method_create: JMethodID,
     pub method_create_ret: ReturnType,
+    pub method_get: JStaticMethodID,
+    pub method_get_ret: ReturnType,
 }
 impl<'a> HadoopFileSystem<'a> {
     pub const SIG_TYPE: &'static str = "org/apache/hadoop/fs/FileSystem";
@@ -998,6 +1020,12 @@ impl<'a> HadoopFileSystem<'a> {
                 "(Lorg/apache/hadoop/fs/Path;)Lorg/apache/hadoop/fs/FSDataOutputStream;",
             )?,
             method_create_ret: ReturnType::Object,
+            method_get: env.get_static_method_id(
+                class,
+                "get",
+                "(Lorg/apache/hadoop/conf/Configuration;)Lorg/apache/hadoop/fs/FileSystem;",
+            )?,
+            method_get_ret: ReturnType::Object,
         })
     }
 }

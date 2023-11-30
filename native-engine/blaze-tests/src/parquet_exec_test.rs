@@ -4,6 +4,9 @@ mod tests {
     use std::path::PathBuf;
 
     use arrow::datatypes::{DataType, Field, Schema};
+    use arrow::record_batch::RecordBatch;
+    use base64::Engine;
+    use base64::prelude::BASE64_URL_SAFE_NO_PAD;
     use blaze_jni_bridge::jni_bridge::JavaClasses;
     use datafusion::{
         datasource::{
@@ -13,13 +16,18 @@ mod tests {
         execution::{object_store::ObjectStoreUrl, TaskContext},
         physical_plan::ExecutionPlan,
     };
+    use datafusion::common::DataFusionError;
+    use datafusion::execution::SendableRecordBatchStream;
+    use futures::StreamExt;
     use datafusion_ext_plans::parquet_exec::ParquetExec;
     use jni::{InitArgsBuilder, JNIVersion, JavaVM};
     use object_store::ObjectMeta;
+    use tokio::runtime::Runtime;
 
     #[test]
     fn test_parquet_exec() {
-        let path = "data/sample0.parquet";
+        let pathStr = "file:/Users/zhnwang/zhenw/blaze/native-engine/blaze-tests/data/sample0.parquet";
+        let path = format!("{}", BASE64_URL_SAFE_NO_PAD.encode(pathStr));
         let rsc_id = "fake";
         // Define schema for the data
         let schema = Arc::new(Schema::new(vec![
@@ -31,7 +39,7 @@ mod tests {
             object_meta: ObjectMeta {
                 location: path.into(),
                 last_modified: Default::default(),
-                size: 813,
+                size: 817,
                 e_tag: None,
             },
             partition_values: vec![],
@@ -93,6 +101,41 @@ mod tests {
         let env = jvm.get_env().unwrap();
         JavaClasses::init(&env);
         let parquet_exec = ParquetExec::new(scan_config, rsc_id.into(), None);
-        let _ = parquet_exec.execute(0, Arc::new(TaskContext::default()));
+        let stream = parquet_exec.execute(0, Arc::new(TaskContext::default())).unwrap();
+        // verify_stream(stream);
+        let rt = Runtime::new().unwrap();
+
+// Run the async function using the runtime
+        let result = rt.block_on(verify_stream(stream));
+
+// Handle the result
+        match result {
+            Ok(_) => println!("Verification succeeded"),
+            Err(e) => println!("Verification failed: {:?}", e),
+        }
+    }
+
+    async fn verify_stream(mut stream: SendableRecordBatchStream) -> arrow::error::Result<()> {
+        // Collect all the record batches from the stream
+        let results: Vec<Result<RecordBatch, DataFusionError>> = stream.collect().await;
+        // Iterate over the record batches
+        for result in &results {
+            // Print the number of rows in the batch
+            let batch = result.as_ref().unwrap();
+            println!("Number of rows: {}", batch.num_rows());
+
+            // Iterate over the columns in the batch
+            for i in 0..batch.num_columns() {
+                // Get the column
+                let column = batch.column(i);
+
+                // Print the number of values in the column
+                println!("Number of values in column {}: {}", i, column.len());
+
+                // TODO: Add more checks here depending on what you want to verify
+            }
+        }
+
+        Ok(())
     }
 }
