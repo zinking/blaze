@@ -16,3 +16,4 @@
 #![feature(slice_swap_unchecked)]
 
 mod parquet_exec_test;
+mod jvm_test;
