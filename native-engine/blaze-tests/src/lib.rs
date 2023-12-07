@@ -17,3 +17,4 @@
 
 mod parquet_exec_test;
 mod jvm_test;
+mod sample_data;

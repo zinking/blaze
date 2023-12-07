@@ -885,7 +885,7 @@ impl From<&protobuf::ScalarFunction> for BuiltinScalarFunction {
     }
 }
 
-fn try_parse_physical_expr(
+pub fn try_parse_physical_expr(
     expr: &protobuf::PhysicalExprNode,
     input_schema: &SchemaRef,
 ) -> Result<Arc<dyn PhysicalExpr>, PlanSerDeError> {
